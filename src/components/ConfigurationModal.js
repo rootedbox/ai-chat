@@ -2,32 +2,39 @@ import React, { useState, useEffect } from "react";
 import { OpenAI } from "openai";
 
 const ConfigurationModal = ({ isOpen, onClose, onSave }) => {
-  const getDefault = (key, fallback) => {
-    return localStorage.getItem(key) || fallback;
-  };
-
-  const defaultUrl = getDefault(
-    "openai_api_url",
-    process.env.REACT_APP_API_URL || "https://api.openai.com/v1"
-  );
-  const defaultModel = getDefault(
-    "openai_model",
-    process.env.REACT_APP_MODEL || "gpt-4o"
-  );
-  const defaultApiKey = getDefault(
-    "openai_api_key",
-    process.env.REACT_APP_API_KEY || ""
-  );
-  const defaultSystemPrompt = getDefault(
-    "openai_system_prompt",
-    process.env.REACT_APP_SYSTEM_PROMPT || "You are a helpful assistant."
-  );
-
-  const [url, setUrl] = useState(defaultUrl);
-  const [model, setModel] = useState(defaultModel);
-  const [apiKey, setApiKey] = useState(defaultApiKey);
-  const [systemPrompt, setSystemPrompt] = useState(defaultSystemPrompt);
+  const [url, setUrl] = useState("");
+  const [model, setModel] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const getDefault = (key, fallback) => {
+      return localStorage.getItem(key) || fallback;
+    };
+
+    const defaultUrl = getDefault(
+      "openai_api_url",
+      process.env.REACT_APP_API_URL || "https://api.openai.com/v1"
+    );
+    const defaultModel = getDefault(
+      "openai_model",
+      process.env.REACT_APP_MODEL || "gpt-4o"
+    );
+    const defaultApiKey = getDefault(
+      "openai_api_key",
+      process.env.REACT_APP_API_KEY || ""
+    );
+    const defaultSystemPrompt = getDefault(
+      "openai_system_prompt",
+      process.env.REACT_APP_SYSTEM_PROMPT || "You are a helpful assistant."
+    );
+
+    setUrl(defaultUrl);
+    setModel(defaultModel);
+    setApiKey(defaultApiKey);
+    setSystemPrompt(defaultSystemPrompt);
+  }, []);
 
   const validateConfig = async () => {
     try {
