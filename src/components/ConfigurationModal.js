@@ -1,72 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { OpenAI } from "openai";
+import { useConfiguration } from "../context/ConfigurationContext"; 
 
-const ConfigurationModal = ({ isOpen, onClose, onSave }) => {
-  const [url, setUrl] = useState("");
-  const [model, setModel] = useState("");
-  const [apiKey, setApiKey] = useState("");
-  const [systemPrompt, setSystemPrompt] = useState("");
+const ConfigurationModal = ({ isOpen, onClose }) => {
+  const { url, model, apiKey, systemPrompt, saveConfiguration } =
+    useConfiguration();
+  const [localUrl, setLocalUrl] = useState(url);
+  const [localModel, setLocalModel] = useState(model);
+  const [localApiKey, setLocalApiKey] = useState(apiKey);
+  const [localSystemPrompt, setLocalSystemPrompt] = useState(systemPrompt);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const getDefault = (key, fallback) => {
-      return localStorage.getItem(key) || fallback;
-    };
-
-    const defaultUrl = getDefault(
-      "openai_api_url",
-      process.env.REACT_APP_API_URL || "https://api.openai.com/v1"
-    );
-    const defaultModel = getDefault(
-      "openai_model",
-      process.env.REACT_APP_MODEL || "gpt-4o"
-    );
-    const defaultApiKey = getDefault(
-      "openai_api_key",
-      process.env.REACT_APP_API_KEY || ""
-    );
-    const defaultSystemPrompt = getDefault(
-      "openai_system_prompt",
-      process.env.REACT_APP_SYSTEM_PROMPT || "You are a helpful assistant."
-    );
-
-    setUrl(defaultUrl);
-    setModel(defaultModel);
-    setApiKey(defaultApiKey);
-    setSystemPrompt(defaultSystemPrompt);
-  }, []);
-
-  const validateConfig = async () => {
-    try {
-      const configuration = {
-        apiKey: apiKey,
-        basePath: url,
-        dangerouslyAllowBrowser: true,
-      };
-      const openai = new OpenAI(configuration);
-      await openai.models.list();
-      return true;
-    } catch (error) {
-      setErrorMessage(
-        "Failed to connect with provided settings: " + error.message
-      );
-      return false;
-    }
-  };
+    setLocalUrl(url);
+    setLocalModel(model);
+    setLocalApiKey(apiKey);
+    setLocalSystemPrompt(systemPrompt);
+  }, [url, model, apiKey, systemPrompt]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
 
-    const isValid = await validateConfig();
-    if (isValid) {
-      localStorage.setItem("openai_api_url", url);
-      localStorage.setItem("openai_model", model);
-      localStorage.setItem("openai_api_key", apiKey);
-      localStorage.setItem("openai_system_prompt", systemPrompt);
+    const success = await saveConfiguration({
+      url: localUrl,
+      model: localModel,
+      apiKey: localApiKey,
+      systemPrompt: localSystemPrompt,
+    });
 
-      onSave({ url, model, apiKey, systemPrompt });
+    if (success) {
       onClose();
+    } else {
+      setErrorMessage(
+        "Failed to connect with provided settings. Please check your API Key, URL, and other details."
+      );
     }
   };
 
@@ -77,14 +44,14 @@ const ConfigurationModal = ({ isOpen, onClose, onSave }) => {
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center">
       <div className="bg-gray-800 text-white p-6 rounded-lg shadow-md w-96">
-        <h2 className="text-xl mb-4">Configure OpenAI Service</h2>
+        <h2 className="text-xl mb-4">Configuration</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block mb-1">URL</label>
+            <label className="block mb-1">API URL</label>
             <input
               type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              value={localUrl}
+              onChange={(e) => setLocalUrl(e.target.value)}
               className="w-full p-2 border border-gray-700 rounded-lg bg-gray-700 text-white"
             />
           </div>
@@ -92,8 +59,8 @@ const ConfigurationModal = ({ isOpen, onClose, onSave }) => {
             <label className="block mb-1">Model</label>
             <input
               type="text"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
+              value={localModel}
+              onChange={(e) => setLocalModel(e.target.value)}
               className="w-full p-2 border border-gray-700 rounded-lg bg-gray-700 text-white"
             />
           </div>
@@ -101,16 +68,16 @@ const ConfigurationModal = ({ isOpen, onClose, onSave }) => {
             <label className="block mb-1">API Key</label>
             <input
               type="text"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              value={localApiKey}
+              onChange={(e) => setLocalApiKey(e.target.value)}
               className="w-full p-2 border border-gray-700 rounded-lg bg-gray-700 text-white"
             />
           </div>
           <div className="mb-4">
             <label className="block mb-1">System Prompt</label>
             <textarea
-              value={systemPrompt}
-              onChange={(e) => setSystemPrompt(e.target.value)}
+              value={localSystemPrompt}
+              onChange={(e) => setLocalSystemPrompt(e.target.value)}
               className="w-full p-2 border border-gray-700 rounded-lg bg-gray-700 text-white"
             />
           </div>

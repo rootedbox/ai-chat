@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 
-// Custom local fonts configuration
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -13,7 +13,6 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-// Updated metadata for the AI chat app
 export const metadata = {
   title: "AI Chat App",
   description: "A simple AI chat app",

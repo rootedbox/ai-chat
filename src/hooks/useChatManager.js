@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-// Custom hook to manage chat state and logic
 export function useChatManager(initialChats) {
   const [chats, setChats] = useState(initialChats);
   const [currentChat, setCurrentChat] = useState("Chat 1");

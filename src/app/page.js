@@ -6,8 +6,12 @@ import ChatWindow from "../components/ChatWindow";
 import ChatInput from "../components/ChatInput";
 import ConfigurationModal from "../components/ConfigurationModal";
 import { useChatManager } from "../hooks/useChatManager";
+import {
+  ConfigurationProvider,
+  useConfiguration,
+} from "../context/ConfigurationContext";
 
-export default function Home() {
+const HomeContent = () => {
   const initialChats = {
     "Chat 1": [
       { role: "assistant", text: "Hello! How can I assist you today?" },
@@ -21,23 +25,38 @@ export default function Home() {
   const { chats, currentChat, setCurrentChat, addMessage, createNewChat } =
     useChatManager(initialChats);
 
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [config, setConfig] = useState({
-    url: process.env.REACT_APP_API_URL,
-    model: process.env.REACT_APP_MODEL,
-    apiKey: process.env.REACT_APP_API_KEY,
-    systemPrompt: process.env.REACT_APP_SYSTEM_PROMPT,
-  });
-
-  const handleSaveConfig = (newConfig) => {
-    setConfig(newConfig);
-  };
+  const {
+    url,
+    model,
+    apiKey,
+    systemPrompt,
+    validateConfig,
+    modalOpen,
+    setModalOpen,
+    loading,
+  } = useConfiguration();
 
   useEffect(() => {
-    if (!config.url || !config.model || !config.apiKey) {
-      setModalOpen(true);
+    if (!loading) {
+      const checkConfig = async () => {
+        const isValid = await validateConfig({
+          url,
+          model,
+          apiKey,
+          systemPrompt,
+        });
+        if (!isValid) {
+          setModalOpen(true);
+        }
+      };
+
+      checkConfig();
     }
-  }, [config]);
+  }, [loading, url, model, apiKey, systemPrompt, validateConfig, setModalOpen]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -46,17 +65,24 @@ export default function Home() {
         setCurrentChat={setCurrentChat}
         createNewChat={createNewChat}
         currentChat={currentChat}
-        onConfigure={() => setModalOpen(true)} // Option to open modal manually
+        onConfigure={() => setModalOpen(true)}
       />
       <div className="flex flex-col flex-1">
         <ChatWindow messages={chats[currentChat]} />
         <ChatInput addMessage={addMessage} />
       </div>
       <ConfigurationModal
-        isOpen={isModalOpen}
+        isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={handleSaveConfig}
       />
     </div>
+  );
+};
+
+export default function Home() {
+  return (
+    <ConfigurationProvider>
+      <HomeContent />
+    </ConfigurationProvider>
   );
 }
