@@ -1,13 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { OpenAI } from "openai";
 
 const ConfigurationModal = ({ isOpen, onClose, onSave }) => {
-  const defaultUrl =
-    process.env.REACT_APP_API_URL || "https://api.openai.com/v1";
-  const defaultModel = process.env.REACT_APP_MODEL || "gpt-4o";
-  const defaultApiKey = process.env.REACT_APP_API_KEY || "";
-  const defaultSystemPrompt =
-    process.env.REACT_APP_SYSTEM_PROMPT || "You are a helpful assistant.";
+  const getDefault = (key, fallback) => {
+    return localStorage.getItem(key) || fallback;
+  };
+
+  const defaultUrl = getDefault(
+    "openai_api_url",
+    process.env.REACT_APP_API_URL || "https://api.openai.com/v1"
+  );
+  const defaultModel = getDefault(
+    "openai_model",
+    process.env.REACT_APP_MODEL || "gpt-4o"
+  );
+  const defaultApiKey = getDefault(
+    "openai_api_key",
+    process.env.REACT_APP_API_KEY || ""
+  );
+  const defaultSystemPrompt = getDefault(
+    "openai_system_prompt",
+    process.env.REACT_APP_SYSTEM_PROMPT || "You are a helpful assistant."
+  );
 
   const [url, setUrl] = useState(defaultUrl);
   const [model, setModel] = useState(defaultModel);
@@ -39,6 +53,11 @@ const ConfigurationModal = ({ isOpen, onClose, onSave }) => {
 
     const isValid = await validateConfig();
     if (isValid) {
+      localStorage.setItem("openai_api_url", url);
+      localStorage.setItem("openai_model", model);
+      localStorage.setItem("openai_api_key", apiKey);
+      localStorage.setItem("openai_system_prompt", systemPrompt);
+
       onSave({ url, model, apiKey, systemPrompt });
       onClose();
     }
