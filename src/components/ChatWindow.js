@@ -21,11 +21,9 @@ export default function ChatWindow({ messages }) {
             className={`p-2 rounded-lg ${
               message.role === "user" ? "bg-gray-600 self-end" : "bg-gray-800"
             }`}
-          >
-            {message.text}
-          </div>
+            dangerouslySetInnerHTML={{ __html: message.text }}
+          ></div>
         ))}
-      {/* Dummy div to ensure scrolling to the very bottom */}
       <div ref={messagesEndRef} />
     </div>
   );

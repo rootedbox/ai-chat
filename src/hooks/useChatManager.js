@@ -1,12 +1,21 @@
 import { useState } from "react";
 import OpenAI from "openai";
 import { useConfiguration } from "../context/ConfigurationContext";
+import { marked } from "marked";
+import markedCodePreview from "marked-code-preview";
+
+marked
+  .use({
+    breaks: true,
+    gfm: true,
+  })
+  .use(markedCodePreview());
 
 export function useChatManager(initialChats) {
   const [chats, setChats] = useState(initialChats);
   const [currentChat, setCurrentChat] = useState("Chat 1");
 
-  const { url, model, apiKey } = useConfiguration();
+  const { url, model, apiKey, systemPrompt } = useConfiguration();
 
   const configuration = {
     apiKey,
@@ -17,7 +26,6 @@ export function useChatManager(initialChats) {
   const client = new OpenAI(configuration);
 
   const addMessage = async (message) => {
-    // Add the user's message
     setChats((prevChats) => {
       const updatedChats = {
         ...prevChats,
@@ -29,14 +37,12 @@ export function useChatManager(initialChats) {
       return updatedChats;
     });
 
-    // Wait for the state to be updated and then call handleAssistantResponse
     setTimeout(async () => {
       await handleAssistantResponse();
     }, 0);
   };
 
   const handleAssistantResponse = async () => {
-    // Fetch the latest state of chats synchronously
     const updatedChats = await new Promise((resolve) => {
       setChats((prevChats) => {
         const currentMessages = prevChats[currentChat] || [];
@@ -55,7 +61,6 @@ export function useChatManager(initialChats) {
       stream: true,
     });
 
-    // Create a placeholder for the assistant's message
     let assistantMessageIndex;
 
     setChats((prevChats) => {
@@ -64,7 +69,7 @@ export function useChatManager(initialChats) {
         ...prevChats,
         [currentChat]: [
           ...(prevChats[currentChat] || []),
-          { role: "assistant", text: "" }, // Placeholder for the streaming message
+          { role: "assistant", text: "" },
         ],
       };
     });
@@ -74,10 +79,12 @@ export function useChatManager(initialChats) {
     for await (const chunk of stream) {
       deltaContent += chunk.choices[0]?.delta?.content || "";
 
+      const htmlContent = marked.parse(deltaContent);
+
       setChats((prevChats) => {
         const updatedMessages = [...prevChats[currentChat]];
         if (updatedMessages[assistantMessageIndex]) {
-          updatedMessages[assistantMessageIndex].text = deltaContent;
+          updatedMessages[assistantMessageIndex].text = htmlContent;
         }
 
         return {
@@ -92,7 +99,7 @@ export function useChatManager(initialChats) {
     const newChatName = `Chat ${Object.keys(chats).length + 1}`;
     setChats((prevChats) => ({
       ...prevChats,
-      [newChatName]: [],
+      [newChatName]: [{ role: "system", text: systemPrompt }],
     }));
     setCurrentChat(newChatName);
   };
