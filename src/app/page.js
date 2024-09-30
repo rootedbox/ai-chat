@@ -59,7 +59,7 @@ const HomeContent = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex h-full min-h-screen bg-gray-700 text-foreground">
       <Sidebar
         chats={chats}
         setCurrentChat={setCurrentChat}
@@ -68,7 +68,9 @@ const HomeContent = () => {
         onConfigure={() => setModalOpen(true)}
       />
       <div className="flex flex-col flex-1">
-        <ChatWindow messages={chats[currentChat]} />
+        <div className="flex-1 overflow-y-auto">
+          <ChatWindow messages={chats[currentChat]} />
+        </div>
         <ChatInput addMessage={addMessage} />
       </div>
       <ConfigurationModal

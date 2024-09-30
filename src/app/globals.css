@@ -31,3 +31,12 @@ body {
     text-wrap: balance;
   }
 }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.bg-background {
+  background-color: #1a1a1a;
+}

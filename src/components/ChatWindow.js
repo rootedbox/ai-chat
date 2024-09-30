@@ -1,6 +1,18 @@
+import { useEffect, useRef } from "react";
+
 export default function ChatWindow({ messages }) {
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
-    <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-700 text-white">
+    <div className="flex-1 p-4 space-y-4 bg-gray-700 text-white overflow-y-auto">
       {messages
         .filter((message) => message.role !== "system")
         .map((message, index) => (
@@ -13,6 +25,8 @@ export default function ChatWindow({ messages }) {
             {message.text}
           </div>
         ))}
+      {/* Dummy div to ensure scrolling to the very bottom */}
+      <div ref={messagesEndRef} />
     </div>
   );
 }
