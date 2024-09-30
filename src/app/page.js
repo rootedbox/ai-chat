@@ -13,13 +13,7 @@ import {
 
 const HomeContent = () => {
   const initialChats = {
-    "Chat 1": [
-      { role: "assistant", text: "Hello! How can I assist you today?" },
-    ],
-    "Chat 2": [
-      { role: "assistant", text: "Hi! What would you like to talk about?" },
-    ],
-    "Chat 3": [{ role: "assistant", text: "Good day! Need any help?" }],
+    "Chat 1": [],
   };
 
   const { chats, currentChat, setCurrentChat, addMessage, createNewChat } =
